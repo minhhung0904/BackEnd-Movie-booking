@@ -1,4 +1,4 @@
-FROM node:20-alpine as builder
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -9,13 +9,14 @@ RUN yarn install --production
 # Sao chép toàn bộ mã nguồn vào thư mục /app
 COPY . .
 
+# Cài đặt PM2 toàn cầu
 RUN yarn global add pm2
-
-# Thay đổi người dùng để đảm bảo quyền truy cập
-USER node
 
 # Mở cổng 3000
 EXPOSE 3000
 
-# Chạy ứng dụng với PM2 mà không cần cấu hình
-CMD ["pm2-runtime", "./src/start.js"]
+# Chạy ứng dụng với PM2
+USER root
+
+# Chạy ứng dụng với PM2
+CMD ["pm2-runtime", "start", "./src/start.js"]
