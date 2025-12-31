@@ -10,7 +10,7 @@ const schemas = require('./schema-api')
 
 const router = new Router()
 
-router.get('/confirm', ctrl.confirm)
+router.post('/confirm', ctrl.confirm)
 
 router.get('/banner', ctrl.getBanner)
 
