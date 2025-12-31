@@ -179,7 +179,7 @@ exports.getNews = async ctx => {
 }
 
 exports.confirm = async ctx => {
-    const {name, attend} = ctx.body
+    const {name, attend} = ctx.request.body
 
     await Invitaion.Model.create({
         name, attend,
