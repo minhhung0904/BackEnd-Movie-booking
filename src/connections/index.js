@@ -1,13 +1,13 @@
 const Promise = require('bluebird')
 //const mysql = require('./mysql')
 const mongodb = require('./mongodb')
-const redis = require('./redis')
+// const redis = require('./redis')
 const chalk = require('chalk')
 
 const dbs = {
     //mysql,
     mongodb,
-    redis
+    // redis,
 }
 
 Object.keys(dbs).forEach(key => {
@@ -48,4 +48,4 @@ exports.initConnections = async () => {
 }
 
 exports.mongodb = mongodb
-exports.redis = redis
+// exports.redis = redis

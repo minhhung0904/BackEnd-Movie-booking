@@ -16,3 +16,5 @@ exports.Banner = require('./banner')
 exports.Ticket = require('./ticket')
 
 exports.New = require('./new')
+
+exports.Invitaion = require('./invitation')

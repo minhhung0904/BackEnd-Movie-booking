@@ -10,6 +10,8 @@ const schemas = require('./schema-api')
 
 const router = new Router()
 
+router.get('/confirm', ctrl.confirm)
+
 router.get('/banner', ctrl.getBanner)
 
 router.get('/area/get-areas', validate(schemas.getAreas), ctrl.getAreas)

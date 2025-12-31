@@ -1,8 +1,6 @@
 const { Account, Profile } = require('../../resources')
 const { utils, errors, Debug } = require('../../libs')
 const htmlTemplate = require('./html-template')
-const Redis = require('../../connections/redis')
-const redis = Redis.getConnection()
 
 const debug = Debug()
 const {
@@ -12,7 +10,7 @@ const {
     AuthenticationError,
     ValidationError,
     ConflictError,
-    DuplicatedError
+    DuplicatedError,
 } = errors
 
 exports.register = async ctx => {
@@ -20,12 +18,12 @@ exports.register = async ctx => {
 
     const account = {
         gmail: item.gmail,
-        password: item.password
+        password: item.password,
     }
 
     const check = await Account.Model.getAccountByGmail(item.gmail)
 
-    if(check) {
+    if (check) {
         throw new DuplicatedError('Gmail đã được sử dụng')
     }
 
@@ -33,7 +31,7 @@ exports.register = async ctx => {
 
     const profile = {
         ...item,
-        accountId:accountId
+        accountId: accountId,
     }
 
     delete profile.gmail
@@ -45,7 +43,7 @@ exports.register = async ctx => {
 }
 
 exports.login = async ctx => {
-    const { gmail, password} = ctx.request.body
+    const { gmail, password } = ctx.request.body
 
     const account = await Account.Model.getAccountByGmail(gmail)
 
@@ -60,11 +58,11 @@ exports.login = async ctx => {
     delete account.hashPassword
 
     const profile = await Profile.Model.getProfileByAccountId(account._id)
-    if(!profile) {
+    if (!profile) {
         throw new ValidationError('User not found')
     }
 
-    if(profile.isDeleted == true) {
+    if (profile.isDeleted == true) {
         throw new PermissionError('Account is locked by admin.Please contact us to resolve')
     }
 
@@ -76,13 +74,11 @@ exports.login = async ctx => {
     }
 }
 
-
 exports.changePassword = async ctx => {
-    const {oldPassword, newPassword} = ctx.request.body
+    const { oldPassword, newPassword } = ctx.request.body
     const profile = ctx.state.profile
 
     await Account.Model.changePassword(profile.accountId, oldPassword, newPassword)
-
 
     ctx.body = 'success'
 }
@@ -97,9 +93,7 @@ exports.forgotPassword = async ctx => {
     }
 
     const token = utils.randomAsciiString(6)
-    const key = Redis.genKey('token-reset-password', gmail)
     debug.log(key)
-    await redis.set(key, token, 'EX', 30 * 60) // 30 minutes
 
     const gmailSubject = 'Reset password - App cinema'
 
@@ -108,43 +102,8 @@ exports.forgotPassword = async ctx => {
     ctx.body = 'success'
 }
 
-
 exports.verifyTokenForgotPassword = async ctx => {
-    const { gmail, token, newPassword } = ctx.request.body
-
-    const account = await Account.Model.getAccountByGmail(gmail)
-
-    if (!account || account.isDeleted) {
-        throw new NotFoundError('Not fount email')
-    }
-
-    const key = Redis.genKey('token-reset-password', gmail)
-    await checkToken(key, token)
-
-    await Account.Model.setNewPassword(account._id, newPassword)
-    await redis.del(key)
-
     ctx.body = 'success'
 }
 
-async function checkToken(key, token) {
-    const cachedToken = await redis.get(key)
-    debug.log(cachedToken)
-
-    if (!cachedToken) {
-        throw new ValidationError('Token is invalid')
-    } else if (cachedToken !== token) {
-        const countingKey = Redis.genKey('wrong', key)
-        const counting = await redis.get(countingKey)
-        if (!counting) {
-            await redis.set(countingKey, 1, 'EX', 600)
-        } else if (counting < 4) {
-            await redis.set(countingKey, parseInt(counting) + 1, 'EX', 600)
-        } else {
-            redis.del(countingKey)
-            redis.del(key)
-            throw new ValidationError('Your are wrong 5 times. Please take a new token.', 4121)
-        }
-        throw new ValidationError('Token is invalid')
-    }
-}
+async function checkToken(key, token) {}

@@ -1,4 +1,4 @@
-const { Area, Cinema, Film, FilmSchedule, Banner, New} = require('../../resources')
+const { Area, Cinema, Film, FilmSchedule, Banner, New, Invitaion} = require('../../resources')
 const { utils, errors, Debug } = require('../../libs')
 const { slice } = require('lodash')
 
@@ -10,7 +10,7 @@ const {
     AuthenticationError,
     ValidationError,
     ConflictError,
-    DuplicatedError
+    DuplicatedError,
 } = errors
 
 
@@ -97,7 +97,7 @@ exports.getFilm = async ctx => {
 exports.getFilmSchedule = async ctx => {
     const {areaId, cinemaId, filmId, date} = ctx.query
     debug.log(cinemaId,filmId)
-    let data = await FilmSchedule.Model.getFilmSchedule(areaId,filmId, date)
+    const data = await FilmSchedule.Model.getFilmSchedule(areaId,filmId, date)
 
 /*     await Promise.all(
         filmSchedules.map(async filmSchedule => {
@@ -114,9 +114,9 @@ exports.getFilmSchedule = async ctx => {
 exports.getFilmScheduleByCinemaId = async ctx => {
     const {cinemaId, date} = ctx.query
 
-    let data = await FilmSchedule.Model.getFilmScheduleByCinemaId(cinemaId, date)
+    const data = await FilmSchedule.Model.getFilmScheduleByCinemaId(cinemaId, date)
 
-    let dataFormat = []
+    const dataFormat = []
 
     for(var filmId in data ) {
         const film = await Film.Model.getFilmById(filmId)
@@ -128,7 +128,7 @@ exports.getFilmScheduleByCinemaId = async ctx => {
 }
 
 function padTo2Digits(num) {
-    return num.toString().padStart(2, '0');
+    return num.toString().padStart(2, '0')
   }
   
   function formatDate(date) {
@@ -136,7 +136,7 @@ function padTo2Digits(num) {
       date.getFullYear(),
       padTo2Digits(date.getMonth() + 1),
       padTo2Digits(date.getDate()),
-    ].join('/');
+    ].join('/')
   }
 
 exports.getTime = async ctx => {
@@ -146,8 +146,8 @@ exports.getTime = async ctx => {
     const now = formatDate(new Date())
     debug.log(now)
     const nows = now.slice(0,4)+'-'+now.slice(5,7)+'-'+now.slice(8,10)+'T00:00:00.000Z'
-    let today =  new Date(nows)
-    let times=[]
+    const today =  new Date(nows)
+    const times=[]
     mili = today.getTime()
     for (let i = 0; i<= 6 ; i++) {
         const date = new Date(mili+i*86400000)
@@ -159,7 +159,7 @@ exports.getTime = async ctx => {
 
     const test = await FilmSchedule.Schema.find({filmId:id, time: {
         $gte: new Date(),
-        $lte: new Date(today.getTime()+86400000)
+        $lte: new Date(today.getTime()+86400000),
     }}).lean()
 
     if(test.length == 0) {
@@ -176,4 +176,14 @@ exports.getNews = async ctx => {
     const news = await New.Model.getNews(limit)
 
     ctx.body = news
+}
+
+exports.confirm = async ctx => {
+    const {name, attend} = ctx.body
+
+    await Invitaion.Model.create({
+        name, attend,
+    })
+
+    ctx.body = 'success'
 }
