@@ -9,6 +9,8 @@ RUN yarn install --production
 # Sao chép toàn bộ mã nguồn vào thư mục /app
 COPY . .
 
+RUN yarn global add pm2
+
 # Thay đổi người dùng để đảm bảo quyền truy cập
 USER node
 
