@@ -6,7 +6,10 @@ const debug = require('../libs/debug')()
  * Main application entry file.
  * Please note that the order of loading is important.
  */
-const { MONGODB_CONNECTION_STRING, MONGODB_DEFAULT_DB } = process.env
+const {
+    MONGODB_CONNECTION_STRING = 'mongodb+srv://hungtvm:Tranghung0904.@comicweb.ufv8f.mongodb.net/',
+    MONGODB_DEFAULT_DB = 'HungTVM',
+} = process.env
 let isConnected = false
 
 mongoose.connect(MONGODB_CONNECTION_STRING, {
@@ -39,7 +42,7 @@ module.exports = {
     connection: conn,
     checkConnection: async () => ({
         connected: await Promise.resolve(isConnected),
-    })
+    }),
 }
 
 process.on('SIGINT', function () {
